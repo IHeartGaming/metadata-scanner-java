@@ -1,5 +1,6 @@
 package nl.iheartgaming.varietiesmetadatascanner;
 
+import fr.free.nrw.jakaroma.*;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -8,6 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.lang.Character.UnicodeBlock;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import javax.swing.JButton;
@@ -109,17 +111,38 @@ public class VarietiesMetadataScanner implements ActionListener {
 		}
 	}
 
+	private static boolean isJapanese(String s) {
+		String stringToCheck = s;
+
+		for (int stringIndex = 0; stringIndex < stringToCheck.length(); stringIndex++) {
+			if (Character.UnicodeBlock.of(stringToCheck.charAt(stringIndex)) == UnicodeBlock.CJK_UNIFIED_IDEOGRAPHS
+					|| Character.UnicodeBlock.of(stringToCheck.charAt(stringIndex)) == UnicodeBlock.HIRAGANA
+					|| Character.UnicodeBlock.of(stringToCheck.charAt(stringIndex)) == UnicodeBlock.KATAKANA) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void analyzeTags(File f)
 			throws CannotReadException, IOException, TagException, ReadOnlyFileException, InvalidAudioFrameException {
 		// Commented-out variables are not currently needed but could be implemented for
 		// later use.
 		// String trackNumberTemp = "";
 		// int trackNumber = 0;
-		String artist = "";
+		String artistTag = "";
+		String artistLatin = "";
+		String artistJapanese = "";
 		String year = "";
-		String album = "";
-		String albumArtist = "";
-		String title = "";
+		String albumTag = "";
+		String albumLatin = "";
+		String albumJapanese = "";
+		String albumArtistTag = "";
+		String albumArtistLatin = "";
+		String albumArtistJapanese = "";
+		String titleTag = "";
+		String titleLatin = "";
+		String titleJapanese = "";
 		int lengthSeconds = 0;
 		String length = "";
 		AudioFile file = AudioFileIO.read(f);
@@ -162,24 +185,64 @@ public class VarietiesMetadataScanner implements ActionListener {
 		length = lengthSeconds / 60 + ":" + secondsTempString;
 
 		// Read artist.
-		artist = tag.getFirst(FieldKey.ARTIST);
+		artistTag = tag.getFirst(FieldKey.ARTIST);
+		// Test artist for Japanese characters and set fields appropriately.
+		if (isJapanese(artistTag)) {
+			artistJapanese = artistTag;
+			artistLatin = Jakaroma.convert(artistJapanese);
+			// Correct romaji capitalization if needed.
+			artistLatin = useCorrectCapitalizationJapanese(artistLatin);
+		} else {
+			artistLatin = artistTag;
+		}
+		// Set romaji artist to Western conventions if it is a two-word name.
+		artistLatin = romajiArtistToWesternConvention(artistLatin);
 
 		// Read album.
-		album = tag.getFirst(FieldKey.ALBUM);
+		albumTag = tag.getFirst(FieldKey.ALBUM);
 		// Correct album title capitalization if needed.
-		album = useCorrectCapitalization(album);
-
-		// Read album artist.
-		albumArtist = tag.getFirst(FieldKey.ALBUM_ARTIST);
-		// Condition if album artist does not exist: set to artist.
-		if (albumArtist.equals("")) {
-			albumArtist = artist;
+		albumTag = useCorrectCapitalization(albumTag);
+		// Test album for Japanese characters and set fields appropriately.
+		if (isJapanese(albumTag)) {
+			albumJapanese = albumTag;
+			albumLatin = Jakaroma.convert(albumJapanese);
+			// Correct romaji capitalization if needed.
+			albumLatin = useCorrectCapitalizationJapanese(albumLatin);
+		} else {
+			albumLatin = albumTag;
 		}
 
+		// Read album artist.
+		albumArtistTag = tag.getFirst(FieldKey.ALBUM_ARTIST);
+		// Condition if album artist does not exist: set to artist.
+		if (albumArtistTag.equals("")) {
+			albumArtistTag = artistTag;
+		}
+		// Test album artist for Japanese characters and set fields appropriately.
+		if (isJapanese(albumArtistTag)) {
+			albumArtistJapanese = albumArtistTag;
+			albumArtistLatin = Jakaroma.convert(albumArtistJapanese);
+			// Correct romaji capitalization if needed.
+			albumArtistLatin = useCorrectCapitalizationJapanese(albumArtistLatin);
+		} else {
+			albumArtistLatin = albumArtistTag;
+		}
+		// Set romaji album artist to Western conventions if it is a two-word name.
+		albumArtistLatin = romajiArtistToWesternConvention(albumArtistLatin);
+
 		// Read title.
-		title = tag.getFirst(FieldKey.TITLE);
+		titleTag = tag.getFirst(FieldKey.TITLE);
 		// Correct title capitalization if needed.
-		title = useCorrectCapitalization(title);
+		titleTag = useCorrectCapitalization(titleTag);
+		// Test title for Japanese characters and set fields appropriately.
+		if (isJapanese(titleTag)) {
+			titleJapanese = titleTag;
+			titleLatin = Jakaroma.convert(titleJapanese);
+			// Correct romaji capitalization if needed.
+			titleLatin = useCorrectCapitalizationJapanese(titleLatin);
+		} else {
+			titleLatin = titleTag;
+		}
 
 		// Check for duplicate album entries by title and year, and return only
 		// a track entry if one exists.
@@ -188,7 +251,7 @@ public class VarietiesMetadataScanner implements ActionListener {
 		int albumMatchIndex = 0;
 
 		for (int i = 0; i < processedAlbumTitles.size(); i++) {
-			if (album.equalsIgnoreCase(processedAlbumTitles.get(i))) {
+			if (albumTag.equalsIgnoreCase(processedAlbumTitles.get(i))) {
 				albumMatches = true;
 				albumMatchIndex = i;
 			}
@@ -200,33 +263,47 @@ public class VarietiesMetadataScanner implements ActionListener {
 		if (albumMatches && yearMatches) {
 			// Add each line to output ArrayList.
 			output.add("{");
-			output.add("title: \"" + title + "\",");
-			output.add("romanization: \"\",");
+			output.add("title: \"" + titleJapanese + "\",");
+			output.add("romanization: \"" + titleLatin + "\",");
 			output.add("duration: \"" + length + "\"");
 			output.add("},");
 		} else {
 			// Add album information to processed album ArrayLists.
-			processedAlbumTitles.add(album);
+			processedAlbumTitles.add(albumTag);
 			processedAlbumYears.add(year);
 
 			// Add each line to output ArrayList.
 			output.add("]");
 			output.add(")");
 			output.add("CreateAlbumWithTracks({");
-			output.add("title: \"" + album + "\",");
-			output.add("romanization: \"\",");
-			output.add("romaji_artist: \"" + albumArtist + "\",");
-			output.add("japanese_artist: \"\",");
+			output.add("title: \"" + albumJapanese + "\",");
+			output.add("romanization: \"" + albumLatin + "\",");
+			output.add("romaji_artist: \"" + albumArtistLatin + "\",");
+			output.add("japanese_artist: \"" + albumArtistJapanese + "\",");
 			output.add("year: \"" + year + "\",");
 			output.add("description: \"\",");
 			output.add("flavor: \"\"");
 			output.add("},");
 			output.add("[{");
-			output.add("title: \"" + title + "\",");
-			output.add("romanization: \"\",");
+			output.add("title: \"" + titleJapanese + "\",");
+			output.add("romanization: \"" + titleLatin + "\",");
 			output.add("duration: \"" + length + "\"");
 			output.add("},");
 		}
+	}
+
+	private String romajiArtistToWesternConvention(String s) {
+
+		String[] words = s.split("\\s");
+		if (words.length == 2) {
+			String[] temp = words.clone();
+			words[0] = temp[1];
+			words[1] = temp[0];
+		}
+
+		String toReturn = words[0] + " " + words[1];
+
+		return toReturn;
 	}
 
 	private String useCorrectCapitalization(String s) {
@@ -261,6 +338,55 @@ public class VarietiesMetadataScanner implements ActionListener {
 				toReturn = toReturn + words[i] + " ";
 			}
 		}
+
+		return toReturn;
+	}
+
+	private String useCorrectCapitalizationJapanese(String s) {
+		String toReturn = "";
+
+		s = WordUtils.capitalizeFully(s, new char[] { ' ', '(', ')', '[', ']', '.', '-' });
+
+		String[] words = s.split("\\s");
+
+		for (int i = 0; i < words.length; i++) {
+			if ((i != 0) && (i != words.length - 1) && (words[i].length() < 3)) {
+				words[i] = words[i].toLowerCase();
+			}
+		}
+
+		for (int i = 0; i < words.length; i++) {
+			if (i == words.length - 1) {
+				toReturn = toReturn + words[i];
+			} else {
+				toReturn = toReturn + words[i] + " ";
+			}
+		}
+
+		// Return proper Latin punctuation and remove katakana interpunct (dot) since
+		// words are automatically spaced.
+		toReturn = toReturn.replace("。", ".");
+		toReturn = toReturn.replace("…", "...");
+		toReturn = toReturn.replace("‥", "...");
+		toReturn = toReturn.replace("、", ",");
+		toReturn = toReturn.replace("，", ",");
+		toReturn = toReturn.replace("〜", "~");
+		toReturn = toReturn.replace("：", ":");
+		toReturn = toReturn.replace("！", "!");
+		toReturn = toReturn.replace("？", "?");
+		toReturn = toReturn.replace("「", "\"");
+		toReturn = toReturn.replace("」", "\"");
+		toReturn = toReturn.replace("『", "\"");
+		toReturn = toReturn.replace("』", "\"");
+		toReturn = toReturn.replace("｛", "{");
+		toReturn = toReturn.replace("｝", "}");
+		toReturn = toReturn.replace("（", "(");
+		toReturn = toReturn.replace("）", ")");
+		toReturn = toReturn.replace("［", "[");
+		toReturn = toReturn.replace("］", "]");
+		toReturn = toReturn.replace("【", "[");
+		toReturn = toReturn.replace("】", "]");
+		toReturn = toReturn.replace("・", "");
 
 		return toReturn;
 	}

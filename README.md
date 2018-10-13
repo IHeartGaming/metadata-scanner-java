@@ -181,6 +181,7 @@ Library.
 Apache Commons Lang is licensed under the Apache License 2.0.
 Apache Commons Text is licensed under the Apache License 2.0.
 khuxtable/seaglass is licensed under the Apache License 2.0.
+nicolas-raoul/jakaroma is licensed under the Apache License 2.0.
 
                                  Apache License
                            Version 2.0, January 2004
