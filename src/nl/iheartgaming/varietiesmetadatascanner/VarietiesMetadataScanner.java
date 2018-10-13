@@ -122,7 +122,6 @@ public class VarietiesMetadataScanner implements ActionListener {
 		String title = "";
 		int lengthSeconds = 0;
 		String length = "";
-		String albumCoverFilename = "";
 		AudioFile file = AudioFileIO.read(f);
 		Tag tag = file.getTag();
 
@@ -177,10 +176,6 @@ public class VarietiesMetadataScanner implements ActionListener {
 			albumArtist = artist;
 		}
 
-		// Set album cover filename to the lowercase album title with all
-		// non-letters or digits removed.
-		albumCoverFilename = album.replaceAll("[^\\p{L}\\d]", "").toLowerCase() + ".jpg";
-
 		// Read title.
 		title = tag.getFirst(FieldKey.TITLE);
 		// Correct title capitalization if needed.
@@ -224,7 +219,6 @@ public class VarietiesMetadataScanner implements ActionListener {
 			output.add("japanese_artist: \"\",");
 			output.add("year: \"" + year + "\",");
 			output.add("description: \"\",");
-			output.add("coverlink: \"" + albumCoverFilename + "\",");
 			output.add("flavor: \"\"");
 			output.add("},");
 			output.add("[{");
