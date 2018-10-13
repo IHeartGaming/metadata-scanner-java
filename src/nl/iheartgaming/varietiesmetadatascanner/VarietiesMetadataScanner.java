@@ -195,8 +195,11 @@ public class VarietiesMetadataScanner implements ActionListener {
 		} else {
 			artistLatin = artistTag;
 		}
-		// Set romaji artist to Western conventions if it is a two-word name.
-		artistLatin = romajiArtistToWesternConvention(artistLatin);
+		// Set romaji artist to Western conventions if it is Japanese and a two-word
+		// name.
+		if (isJapanese(artistTag)) {
+			artistLatin = romajiArtistToWesternConvention(artistLatin);
+		}
 
 		// Read album.
 		albumTag = tag.getFirst(FieldKey.ALBUM);
@@ -227,8 +230,11 @@ public class VarietiesMetadataScanner implements ActionListener {
 		} else {
 			albumArtistLatin = albumArtistTag;
 		}
-		// Set romaji album artist to Western conventions if it is a two-word name.
-		albumArtistLatin = romajiArtistToWesternConvention(albumArtistLatin);
+		// Set romaji album artist to Western conventions if it is Japanese and a
+		// two-word name.
+		if (isJapanese(albumArtistTag)) {
+			albumArtistLatin = romajiArtistToWesternConvention(albumArtistLatin);
+		}
 
 		// Read title.
 		titleTag = tag.getFirst(FieldKey.TITLE);
@@ -386,7 +392,24 @@ public class VarietiesMetadataScanner implements ActionListener {
 		toReturn = toReturn.replace("］", "]");
 		toReturn = toReturn.replace("【", "[");
 		toReturn = toReturn.replace("】", "]");
+		toReturn = toReturn.replace("／", "/");
 		toReturn = toReturn.replace("・", "");
+
+		// Remove incorrectly-generated spaces before certain punctuation marks.
+		toReturn = toReturn.replace(" .", ".");
+		toReturn = toReturn.replace(" ,", ",");
+		toReturn = toReturn.replace(" ~", "~");
+		toReturn = toReturn.replace(" -", "-");
+		toReturn = toReturn.replace(" !", "!");
+		toReturn = toReturn.replace(" ?", "?");
+		toReturn = toReturn.replace(" /", "/");
+		toReturn = toReturn.replace(" }", "}");
+		toReturn = toReturn.replace(" )", ")");
+		toReturn = toReturn.replace(" ]", "]");
+		toReturn = toReturn.replace(" '", "'");
+
+		// Replace incorrectly-generated double spaces with single spaces.
+		toReturn = toReturn.replace("  ", " ");
 
 		return toReturn;
 	}

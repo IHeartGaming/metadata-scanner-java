@@ -3,6 +3,7 @@
 This client automatically pulls metadata from audio files or folders of them that a user selects. Output files can be submitted to varieti.es, a city pop album archive (http://varieti.es/), to add to its database.
 
 
+
 jaudiotagger:audio tagging library Copyright (C) 2015 Paul Taylor
 
 This library is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
@@ -10,6 +11,7 @@ This library is free software; you can redistribute it and/or modify it under th
 This library is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License along with this library; if not, write to the Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
 
                    GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
@@ -178,10 +180,15 @@ permanent authorization for you to choose that version for the
 Library.
 
 
+
 Apache Commons Lang is licensed under the Apache License 2.0.
+
 Apache Commons Text is licensed under the Apache License 2.0.
+
 khuxtable/seaglass is licensed under the Apache License 2.0.
+
 nicolas-raoul/jakaroma is licensed under the Apache License 2.0.
+
 
                                  Apache License
                            Version 2.0, January 2004
