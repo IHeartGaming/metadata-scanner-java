@@ -190,6 +190,20 @@ khuxtable/seaglass is licensed under the Apache License 2.0.
 nicolas-raoul/jakaroma is licensed under the Apache License 2.0.
 
 
+Apache Commons Lang
+Copyright 2001-2018 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
+Apache Commons Text
+Copyright 2014-2018 The Apache Software Foundation
+
+This product includes software developed at
+The Apache Software Foundation (http://www.apache.org/).
+
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/

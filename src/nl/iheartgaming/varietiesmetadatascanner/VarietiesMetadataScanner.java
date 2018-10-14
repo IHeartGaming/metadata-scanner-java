@@ -212,7 +212,7 @@ public class VarietiesMetadataScanner implements ActionListener {
 			// Correct romaji capitalization if needed.
 			albumLatin = useCorrectCapitalizationJapanese(albumLatin);
 		} else {
-			albumLatin = albumTag;
+			albumJapanese = albumTag;
 		}
 
 		// Read album artist.
@@ -247,7 +247,7 @@ public class VarietiesMetadataScanner implements ActionListener {
 			// Correct romaji capitalization if needed.
 			titleLatin = useCorrectCapitalizationJapanese(titleLatin);
 		} else {
-			titleLatin = titleTag;
+			titleJapanese = titleTag;
 		}
 
 		// Check for duplicate album entries by title and year, and return only
@@ -299,17 +299,7 @@ public class VarietiesMetadataScanner implements ActionListener {
 	}
 
 	private String romajiArtistToWesternConvention(String s) {
-
-		String[] words = s.split("\\s");
-		if (words.length == 2) {
-			String[] temp = words.clone();
-			words[0] = temp[1];
-			words[1] = temp[0];
-		}
-
-		String toReturn = words[0] + " " + words[1];
-
-		return toReturn;
+		return s.replaceAll("(.+)\\s+(.+)", "$2 $1");
 	}
 
 	private String useCorrectCapitalization(String s) {
